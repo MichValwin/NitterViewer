@@ -1,0 +1,11 @@
+const VERSION = '0.0.1'
+
+const SERVER_END_POINT = '/v1';
+const SERVER_PORT = '8020';
+
+export default {
+    VERSION: VERSION,
+    
+    SERVER_END_POINT: SERVER_END_POINT,
+	SERVER_PORT: SERVER_PORT
+}
