@@ -7,7 +7,8 @@ var httpsAgent;
 // Use proxy or normal connection
 if(configModule.SOCKS_PROXY) {
 	console.log('Using SOCKS proxy');
-	httpsAgent = new require('socks-proxy-agent')(configModule.SOCKS_PROXY);
+	let {SocksProxyAgent} = require('socks-proxy-agent')
+	httpsAgent =  new SocksProxyAgent(configModule.SOCKS_PROXY);
 } else {
 	httpsAgent = https.Agent({});
 }
