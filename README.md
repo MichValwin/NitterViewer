@@ -1,6 +1,6 @@
 # Nitter Viewer
 
-This project is in a ery early state, bugs are expected.
+This project is in a very early state, bugs are expected.
 
 ## Build instructions
  - Install packages for vue frontend.
