@@ -37,8 +37,8 @@ function isTweetRetweet(tweet) {
 
 async function checkFileExistAndDownload(filenamePath) {
 	const fileName = path.basename(filenamePath); // file without /pic path
-	const localFilePath = path.resolve(configModule.DOWNLOAD_PIC_FOLDER, fileName);
-
+	const localFilePath = path.resolve(configModule.DOWNLOAD_FOLDER + 'pic/', fileName);
+	
 	if(!fs.existsSync(localFilePath)) {
 		console.log('Downloading file: ' + 'https://nitter.privacy.com.de' + filenamePath);
 		const responseBuffer = await requestModule.downloadStream('https://nitter.privacy.com.de' + filenamePath);

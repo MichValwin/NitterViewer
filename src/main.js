@@ -191,6 +191,12 @@ function initProgram(){
 		fs.writeFileSync(configModule.PASSWORD_FILE, hashedPasswd, {encoding: "utf8"});
 	}
 
+	// Check directories
+	let picDownloadDirectory = configModule.DOWNLOAD_FOLDER + 'pic/';
+	if (!fs.existsSync(picDownloadDirectory)){
+		fs.mkdirSync(picDownloadDirectory, { recursive: true });
+	}
+
 	// Load twitter user list
 	if(fs.existsSync(configModule.TWITTER_LISTS)) {
 		const nitterListObj = JSON.parse(fs.readFileSync(configModule.TWITTER_LISTS));
