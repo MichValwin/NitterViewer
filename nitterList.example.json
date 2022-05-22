@@ -1,0 +1,10 @@
+{
+	"Lists": [
+		{"Name": "News", "Pinned": false, "Retweets": false, "PagesToLoad": 1, "Users": [
+			"NASA", "esa"
+		]},
+		{"Name": "Other things", "Pinned": true, "Retweets": true, "PagesToLoad": 1, "Users": [
+			"Twitter"
+		]}
+	]
+}

@@ -1,0 +1,29 @@
+{
+  "name": "nitterscrapper2",
+  "version": "0.0.1",
+  "description": "Nitter scrapper",
+  "main": "main.js",
+  "scripts": {
+    "start": "node ./src/main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://192.168.1.151:3000/MichaelValwin/NitterScrapper2.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "bcrypt": "^5.0.1",
+    "compression": "^1.7.4",
+    "express": "^4.17.3",
+    "express-session": "^1.17.2",
+    "node-gameloop": "^0.1.4",
+    "node-html-parser": "^5.3.3",
+    "prompt-sync": "^4.2.0",
+    "socks-proxy-agent": "^6.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.13.0"
+  }
+}
