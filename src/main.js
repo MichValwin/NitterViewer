@@ -33,7 +33,7 @@ expressApp.use(session({
 	cookie: {
 		secure: false,
 		httpOnly: false,
-		maxAge: 1000 * 60 * 60 * 72 // 72h
+		maxAge: 1000 * 60 * 60 * 24 * 30 // 30 days
 	}
 }));
 
