@@ -33,7 +33,7 @@ expressApp.use(session({
 	cookie: {
 		secure: false,
 		httpOnly: false,
-		maxAge: 1000 * 60 * 60 * 24 * 30 // 30 days
+		maxAge: configModule.COOKIE_MAX_AGE
 	}
 }));
 
@@ -82,7 +82,6 @@ expressApp.post(configModule.API_ENDPOINT + '/logged', anySession, function (req
 
 expressApp.post(configModule.API_ENDPOINT + '/login', noSession, function (req, res) {
 	const jsonData = req.body;
-	console.log(jsonData);
 	const password = jsonData.password;
 
 	// TODO MADE VERIFICATIONS WITH A JSON INPUT OR SOMETHING AUTOMATICALLY 
@@ -166,12 +165,12 @@ expressApp.use(function(error, req, res, next) {
 
 // Init server
 const server = http.listen(configModule.PORT, function () {
-	console.log('Server node initialized on port: ' + configModule.PORT);
+	console.log('Server initialized on port: ' + configModule.PORT);
 });
 
 // ----------------------------------------------
 
-// TODO make test in other files
+// TODO make tests in other files
 var nitterList;
 var requestDataTimeStamp = new Date();
 
@@ -203,7 +202,7 @@ function initProgram(){
 		nitterList = nitterListObj.Lists;
 	}else{
 		// TODO CREATE template for file
-		console.log(configModule.TWITTER_LISTS + ' file for nitter list does not exist');
+		console.log(configModule.TWITTER_LISTS + ' file for nitter list does not exist, please create a file nitterList.json from the example');
 		process.exit();
 	}
 	
@@ -251,8 +250,8 @@ function mainLoop() {
 	var timeMillisedonds = new Date().getTime();
 	var timeSinceLastUpdate = timeMillisedonds - requestDataTimeStamp.getTime();
 
-	//TODO Update every 6 hours
-	if(timeSinceLastUpdate > 1000 * 60 * 60 * 6) {
+	//Update every X hours
+	if(timeSinceLastUpdate > configModule.UPDATE_TIME) {
 		updateAllNitterUserData();
 
 		requestDataTimeStamp = new Date();
