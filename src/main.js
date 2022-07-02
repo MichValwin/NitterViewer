@@ -14,7 +14,7 @@ var http = require('http').createServer(expressApp);
 
 const configModule = require('./config.js');
 const logModule = require('./logger.js');
-logModule.initLogger(configModule.LOGGIN_DIRECTORY, logModule.LOG_LEVEL_INFO);
+logModule.initLogger(configModule.LOGGIN_DIRECTORY, logModule.LOG_LEVEL_DEBUG);
 const errorModule = require('./error.js');
 const requestModule = require('./request.js');
 const processNitterUserpage = require('./processNitterUserpage.js');
@@ -230,21 +230,17 @@ function updateAllNitterUserData() {
 							requestDataTimeStamp = new Date();
 						},
 						function(error) {
-							console.log(error);
-							logModule.log(logModule.LOG_LEVEL_ERROR, 'Error while parsing ' + configModule.NITTER_WEBSITE + nitterList[i].Users[i]);
-							logModule.log(logModule.LOG_LEVEL_ERROR, error.stack);
-							logModule.log(logModule.LOG_LEVEL_ERROR, error.pageData);
+							logModule.log(logModule.LOG_LEVEL_ERROR, 'Error while parsing ' + configModule.NITTER_WEBSITE + nitterList[i].Users[j]);
+							logModule.log(logModule.LOG_LEVEL_DEBUG, error.stack);
+							logModule.log(logModule.LOG_LEVEL_DEBUG, error.pageData);
 						}
 					);
 					
 				}
 			).catch(
 				function onError(error){
-					logModule.log(logModule.LOG_LEVEL_ERROR, 'Error during request to page, error: ');
+					logModule.log(logModule.LOG_LEVEL_ERROR, 'Error during request to page, url: ' + error.config.url + ' response: ' + error.response.status);
 					logModule.log(logModule.LOG_LEVEL_ERROR, error.stack);
-					logModule.log(logModule.LOG_LEVEL_ERROR, 'config.method: ' + error.config.method);
-					logModule.log(logModule.LOG_LEVEL_ERROR, 'config.url: ' + error.config.url);
-					logModule.log(logModule.LOG_LEVEL_ERROR, 'config.response.status: ' + error.response.status);
 				}
 			);
 		}
