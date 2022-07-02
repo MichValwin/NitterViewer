@@ -139,3 +139,6 @@ package-lock.json
 password.txt
 nitterList.json
 resources/404p.png
+
+# Logs
+logs/

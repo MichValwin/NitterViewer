@@ -1,6 +1,7 @@
 module.exports = {
     PORT: 8020,
 	API_ENDPOINT: '/v1',
+	LOGGIN_DIRECTORY: './logs/',
 
 	DEBUG: false,
 	PASSWORD_FILE: './password.txt',

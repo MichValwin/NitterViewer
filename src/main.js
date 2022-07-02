@@ -13,6 +13,8 @@ var expressApp = express();
 var http = require('http').createServer(expressApp);
 
 const configModule = require('./config.js');
+const logModule = require('./logger.js');
+logModule.initLogger(configModule.LOGGIN_DIRECTORY, logModule.LOG_LEVEL_INFO);
 const errorModule = require('./error.js');
 const requestModule = require('./request.js');
 const processNitterUserpage = require('./processNitterUserpage.js');
@@ -64,17 +66,17 @@ function anySession(req, res, next){
 // DEBUG MIDDLEWARE
 if(configModule.DEBUG) {
 	expressApp.use(function(req, res, next){
-		console.log('Request url: ' + req.method + ' ' +  req.url);
+		logModule.log(logModule.LOG_LEVEL_DEBUG, 'Request url: ' + req.method + ' ' +  req.url);
 		next();
 	});
 }
 
 expressApp.post(configModule.API_ENDPOINT + '/logged', anySession, function (req, res) {
 	if(req.session.user !== undefined) {
-		console.log('User exists');
+		logModule.log(logModule.LOG_LEVEL_DEBUG, 'User exist in session');
         res.json({'response': 1});
     }else{
-		console.log('User not exists');
+		logModule.log(logModule.LOG_LEVEL_DEBUG, 'User does not exist in session');
 		res.json({'response': 0});
     }
 });
@@ -152,8 +154,8 @@ expressApp.get('/pic/*', someSession, function (req, res) {
 });
 
 // 404 handler
-expressApp.use(function(req, res){
-	console.log('Go to 404 handler');
+expressApp.use(function(req, res) {
+	logModule.log(logModule.LOG_LEVEL_DEBUG, 'Go to 404 handler');
 	res.status(404).json({'response' : 0});
 });
 
@@ -165,7 +167,7 @@ expressApp.use(function(error, req, res, next) {
 
 // Init server
 const server = http.listen(configModule.PORT, function () {
-	console.log('Server initialized on port: ' + configModule.PORT);
+	logModule.log(logModule.LOG_LEVEL_INFO, 'Server initialized on port: ' + configModule.PORT);
 });
 
 // ----------------------------------------------
@@ -177,12 +179,12 @@ var requestDataTimeStamp = new Date();
 function initProgram(){
 	// Check if there is a passwd, if not create it
 	if(!fs.existsSync(configModule.PASSWORD_FILE)) {
-		console.log('Looks like there is no password file');
+		logModule.log(logModule.LOG_LEVEL_INFO, 'Looks like there is no password file');
 		let passwd1 = promptModule('Please introduce the password now: ');
 		let passwd2 = promptModule('Please introduce it again: ');
 
 		while(passwd1 != passwd2) {
-			console.log('Passwords are different, please introduce it again')
+			logModule.log(logModule.LOG_LEVEL_INFO, 'Passwords are different, please introduce it again');
 			passwd1 = promptModule('Please introduce the password now: ');
 			passwd2 = promptModule('Please repeat the password: ');
 		} 
@@ -202,7 +204,7 @@ function initProgram(){
 		nitterList = nitterListObj.Lists;
 	}else{
 		// TODO CREATE template for file
-		console.log(configModule.TWITTER_LISTS + ' file for nitter list does not exist, please create a file nitterList.json from the example');
+		logModule.log(logModule.LOG_LEVEL_INFO, configModule.TWITTER_LISTS + ' file for nitter list does not exist, please create a file nitterList.json from the example');
 		process.exit();
 	}
 	
@@ -227,17 +229,22 @@ function updateAllNitterUserData() {
 							nitterList[i].data.push(response);
 							requestDataTimeStamp = new Date();
 						},
-						function(error){
-							console.log('Error while parsing ' + configModule.NITTER_WEBSITE + nitterList[i].Users[i]);
+						function(error) {
 							console.log(error);
+							logModule.log(logModule.LOG_LEVEL_ERROR, 'Error while parsing ' + configModule.NITTER_WEBSITE + nitterList[i].Users[i]);
+							logModule.log(logModule.LOG_LEVEL_ERROR, error.stack);
+							logModule.log(logModule.LOG_LEVEL_ERROR, error.pageData);
 						}
 					);
 					
 				}
 			).catch(
 				function onError(error){
-					console.log('Error during request to page, error: ');
-					console.log(error);
+					logModule.log(logModule.LOG_LEVEL_ERROR, 'Error during request to page, error: ');
+					logModule.log(logModule.LOG_LEVEL_ERROR, error.stack);
+					logModule.log(logModule.LOG_LEVEL_ERROR, 'config.method: ' + error.config.method);
+					logModule.log(logModule.LOG_LEVEL_ERROR, 'config.url: ' + error.config.url);
+					logModule.log(logModule.LOG_LEVEL_ERROR, 'config.response.status: ' + error.response.status);
 				}
 			);
 		}
