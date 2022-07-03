@@ -39,8 +39,6 @@ exports.initLogger = function(logDir, logLevel) {
 	});
 	let numLogs = allLogsFileNames.length;
 
-	console.log(allLogsFileNames);
-
 	// Remove one old file
 	if(numLogs >= MAX_LOGS) {
 		let oldestFile = null;
@@ -74,7 +72,6 @@ exports.initLogger = function(logDir, logLevel) {
 			arrExistingNum[fileNum] = true;
 		}
 	});
-	console.log(arrExistingNum);
 	for(let i = 0; i < arrExistingNum.length; i++) {
 		if(!arrExistingNum[i]) {
 			smallerAvalibleFileNum = i;
