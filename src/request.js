@@ -1,13 +1,15 @@
 const axios = require('axios');
 const https = require('https');
 const configModule = require('./config.js');
+const logModule = require('./logger.js');
 
 var httpsAgent;
 
 // Use proxy or normal connection
 if(configModule.SOCKS_PROXY) {
-	console.log('Using SOCKS proxy');
-	let {SocksProxyAgent} = require('socks-proxy-agent')
+	logModule.log(logModule.LOG_LEVEL_INFO, 'Using SOCKS proxy');
+
+	let {SocksProxyAgent} = require('socks-proxy-agent');
 	httpsAgent =  new SocksProxyAgent(configModule.SOCKS_PROXY);
 } else {
 	httpsAgent = https.Agent({});
