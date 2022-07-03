@@ -169,6 +169,8 @@ expressApp.use(function(error, req, res, next) {
 const server = http.listen(configModule.PORT, function () {
 	logModule.log(logModule.LOG_LEVEL_INFO, 'Log Level: ' + configModule.LOG_LEVEL);
 	logModule.log(logModule.LOG_LEVEL_INFO, 'Server initialized on port: ' + configModule.PORT);
+
+	initProgram();
 });
 
 // ----------------------------------------------
@@ -203,6 +205,7 @@ function initProgram() {
 	if(fs.existsSync(configModule.TWITTER_LISTS)) {
 		const nitterListObj = JSON.parse(fs.readFileSync(configModule.TWITTER_LISTS));
 		nitterList = nitterListObj.Lists;
+		logModule.log(logModule.LOG_LEVEL_INFO, 'Loaded user list with ' + nitterList.length + ' lists');
 	}else{
 		// TODO CREATE template for file
 		logModule.log(logModule.LOG_LEVEL_INFO, configModule.TWITTER_LISTS + ' file for nitter list does not exist, please create a file nitterList.json from the example');
@@ -217,14 +220,18 @@ function initProgram() {
 }
 
 function updateAllNitterUserData() {
+	logModule.log(logModule.LOG_LEVEL_INFO, 'Started to update Nitter lists');
+
+	let allPromisesRequest = [];
+	
 	// Lists
 	for(let i = 0; i < nitterList.length; i++) {
 		nitterList[i].data = new Array();
 
 		// Users
 		for(let j = 0; j < nitterList[i].Users.length; j++) {
-			requestModule.doGETRequest(configModule.NITTER_WEBSITE + nitterList[i].Users[j]).then(
-				function onFullfill(twitterPageContent){
+			let promiseReq = requestModule.doGETRequest(configModule.NITTER_WEBSITE + nitterList[i].Users[j]).then(
+				function onFullfill(twitterPageContent) {
 					processNitterUserpage.parseTwitterUserPage(twitterPageContent, {"Pinned": nitterList[i].Pinned, "Retweets" : nitterList[i].Retweets}).then(
 						function onFullfill(response){
 							nitterList[i].data.push(response);
@@ -236,7 +243,6 @@ function updateAllNitterUserData() {
 							logModule.log(logModule.LOG_LEVEL_DEBUG, error.pageData);
 						}
 					);
-					
 				}
 			).catch(
 				function onError(error){
@@ -244,8 +250,14 @@ function updateAllNitterUserData() {
 					logModule.log(logModule.LOG_LEVEL_ERROR, error.stack);
 				}
 			);
+
+			allPromisesRequest.push(promiseReq);
 		}
 	}
+
+	Promise.all(allPromisesRequest).then(function(){
+		logModule.log(logModule.LOG_LEVEL_INFO, 'Finish to update Nitter lists');
+	});
 }
 
 
@@ -261,8 +273,6 @@ function mainLoop() {
 		requestDataTimeStamp = new Date();
 	}
 }
-
-initProgram();
 
 
 //On close
