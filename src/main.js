@@ -14,7 +14,7 @@ var http = require('http').createServer(expressApp);
 
 const configModule = require('./config.js');
 const logModule = require('./logger.js');
-logModule.initLogger(configModule.LOGGIN_DIRECTORY, logModule.LOG_LEVEL_DEBUG);
+logModule.initLogger(configModule.LOG_DIRECTORY, configModule.LOG_LEVEL);
 const errorModule = require('./error.js');
 const requestModule = require('./request.js');
 const processNitterUserpage = require('./processNitterUserpage.js');
@@ -40,23 +40,23 @@ expressApp.use(session({
 }));
 
 //--Verifications
-function noSession(req, res, next){
-    if(req.session.user === undefined){
+function noSession(req, res, next) {
+    if(req.session.user === undefined) {
         return next();
     }else{
         throw new errorModule.Error(errorModule.TYPE_IMPUT_USER, 'Already logged');
     }
 }
 
-function someSession(req, res, next){
-    if(req.session.user !== undefined){
+function someSession(req, res, next) {
+    if(req.session.user !== undefined) {
         return next();
     }else{
         throw new errorModule.Error(errorModule.TYPE_IMPUT_USER, 'Not logged');
     }
 }
 
-function anySession(req, res, next){
+function anySession(req, res, next) {
     return next();
 }
 
@@ -155,8 +155,8 @@ expressApp.get('/pic/*', someSession, function (req, res) {
 
 // 404 handler
 expressApp.use(function(req, res) {
-	logModule.log(logModule.LOG_LEVEL_DEBUG, 'Go to 404 handler');
-	res.status(404).json({'response' : 0});
+	logModule.log(logModule.LOG_LEVEL_DEBUG, 'Redirect to index');
+	res.status(302).redirect('/');
 });
 
 
@@ -167,6 +167,7 @@ expressApp.use(function(error, req, res, next) {
 
 // Init server
 const server = http.listen(configModule.PORT, function () {
+	logModule.log(logModule.LOG_LEVEL_INFO, 'Log Level: ' + configModule.LOG_LEVEL);
 	logModule.log(logModule.LOG_LEVEL_INFO, 'Server initialized on port: ' + configModule.PORT);
 });
 
@@ -176,7 +177,7 @@ const server = http.listen(configModule.PORT, function () {
 var nitterList;
 var requestDataTimeStamp = new Date();
 
-function initProgram(){
+function initProgram() {
 	// Check if there is a passwd, if not create it
 	if(!fs.existsSync(configModule.PASSWORD_FILE)) {
 		logModule.log(logModule.LOG_LEVEL_INFO, 'Looks like there is no password file');
@@ -239,7 +240,7 @@ function updateAllNitterUserData() {
 				}
 			).catch(
 				function onError(error){
-					logModule.log(logModule.LOG_LEVEL_ERROR, 'Error during request to page, url: ' + error.config.url + ' response: ' + error.response.status);
+					logModule.log(logModule.LOG_LEVEL_ERROR, 'Error during request to page, url: ' + error.config.url + ' response: ' + error.response?.status);
 					logModule.log(logModule.LOG_LEVEL_ERROR, error.stack);
 				}
 			);
