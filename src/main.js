@@ -64,12 +64,10 @@ function anySession(req, res, next) {
 
 //--Routes
 // DEBUG MIDDLEWARE
-if(configModule.DEBUG) {
-	expressApp.use(function(req, res, next){
-		logModule.log(logModule.LOG_LEVEL_DEBUG, 'Request url: ' + req.method + ' ' +  req.url);
-		next();
-	});
-}
+expressApp.use(function(req, res, next){
+	logModule.log(logModule.LOG_LEVEL_DEBUG, 'Request url: ' + req.method + ' ' +  req.url);
+	next();
+});
 
 expressApp.post(configModule.API_ENDPOINT + '/logged', anySession, function (req, res) {
 	if(req.session.user !== undefined) {
@@ -255,7 +253,7 @@ function updateAllNitterUserData() {
 		}
 	}
 
-	Promise.all(allPromisesRequest).then(function(){
+	Promise.all(allPromisesRequest).then(function() {
 		logModule.log(logModule.LOG_LEVEL_INFO, 'Finish to update Nitter lists');
 	});
 }
@@ -266,7 +264,7 @@ function mainLoop() {
 	var timeMillisedonds = new Date().getTime();
 	var timeSinceLastUpdate = timeMillisedonds - requestDataTimeStamp.getTime();
 
-	//Update every X hours
+	// Update every X hours
 	if(timeSinceLastUpdate > configModule.UPDATE_TIME) {
 		updateAllNitterUserData();
 
@@ -275,7 +273,7 @@ function mainLoop() {
 }
 
 
-//On close
+// On close
 process.on('SIGINT', function(){
 	server.close();
 	process.exit();
