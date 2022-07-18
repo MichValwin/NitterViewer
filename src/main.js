@@ -11,6 +11,7 @@ const compression = require('compression');
 var express = require('express');
 var expressApp = express();
 var http = require('http').createServer(expressApp);
+const HTMLParser = require('node-html-parser');
 
 const configModule = require('./config.js');
 const logModule = require('./logger.js');
@@ -114,17 +115,37 @@ expressApp.get(configModule.API_ENDPOINT + '/lists', someSession, function (req,
 
 expressApp.get(configModule.API_ENDPOINT + '/twitterList/:listName', someSession, function (req, res) {
 	const listName = req.params.listName
-	var twitterListToSend = null;
+	var userTimelinesToSend = null;
+	var options = {"Pinned": true, "Retweets": true, "PagesToLoad": 1};
 
 	if(listName != null) {
 		for(let i = 0; i < nitterList.length; i++) {
 			if(nitterList[i].Name == listName) {
-				twitterListToSend = nitterList[i].data;
+				userTimelinesToSend = new Array(nitterList[i].userData.length);
+
+				for(let j = 0; j < nitterList[i].userData.length; j++) {
+					userTimelinesToSend[j] = {};
+					userTimelinesToSend[j].profile = nitterList[i].userData[j].profile;
+					userTimelinesToSend[j].timeline = [];
+					userTimelinesToSend[j].entireTimeline = nitterList[i].userData[j].userPageHtml;
+				}
+
+				options.Pinned = nitterList[i].Pinned;
+				options.Retweets = nitterList[i].Retweets;
 			}
 		}
 
-		if(twitterListToSend) {
-			res.json({'response': twitterListToSend});
+		// Filter Tweets
+		let startTimeFilter = new Date().getTime();
+		for(let i = 0; i < userTimelinesToSend.length; i++) {
+			let entireTimelineHtml = processNitterUserpage.filterTwitterUserPage(userTimelinesToSend[i].entireTimeline, options);
+			userTimelinesToSend[i].entireTimeline = entireTimelineHtml;
+		}
+		let endTimeFilter = new Date().getTime();
+		logModule.log(logModule.LOG_LEVEL_VERBOSE, 'Milliseconds taken to filter tweets: ' + (endTimeFilter - startTimeFilter));
+		
+		if(userTimelinesToSend) {
+			res.json({'response': userTimelinesToSend});
 		}else{
 			throw new errorModule.Error(errorModule.TYPE_LOGIC, 'No data');
 		}
@@ -224,16 +245,16 @@ function updateAllNitterUserData() {
 	
 	// Lists
 	for(let i = 0; i < nitterList.length; i++) {
-		nitterList[i].data = new Array();
+		nitterList[i].userData = new Array(nitterList[i].Users.length);
+		nitterList[i].userData.fill(null);
 
 		// Users
 		for(let j = 0; j < nitterList[i].Users.length; j++) {
 			let promiseReq = requestModule.doGETRequest(configModule.NITTER_WEBSITE + nitterList[i].Users[j]).then(
 				function onFullfill(twitterPageContent) {
-					processNitterUserpage.parseTwitterUserPage(twitterPageContent, {"Pinned": nitterList[i].Pinned, "Retweets" : nitterList[i].Retweets}).then(
+					processNitterUserpage.processNitterUserHtmlPage(twitterPageContent).then(
 						function onFullfill(response){
-							nitterList[i].data.push(response);
-							requestDataTimeStamp = new Date();
+							nitterList[i].userData[j] = response;
 						},
 						function(error) {
 							logModule.log(logModule.LOG_LEVEL_ERROR, 'Error while parsing ' + configModule.NITTER_WEBSITE + nitterList[i].Users[j]);
@@ -255,6 +276,7 @@ function updateAllNitterUserData() {
 
 	Promise.all(allPromisesRequest).then(function() {
 		logModule.log(logModule.LOG_LEVEL_INFO, 'Finish to update Nitter lists');
+		requestDataTimeStamp = new Date();
 	});
 }
 
