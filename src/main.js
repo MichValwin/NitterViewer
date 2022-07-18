@@ -126,7 +126,6 @@ expressApp.get(configModule.API_ENDPOINT + '/twitterList/:listName', someSession
 				for(let j = 0; j < nitterList[i].userData.length; j++) {
 					userTimelinesToSend[j] = {};
 					userTimelinesToSend[j].profile = nitterList[i].userData[j].profile;
-					userTimelinesToSend[j].timeline = [];
 					userTimelinesToSend[j].entireTimeline = nitterList[i].userData[j].userPageHtml;
 				}
 

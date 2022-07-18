@@ -155,7 +155,6 @@ exports.processNitterUserHtmlPage = async function(axiosResponse) {
 
 
 exports.filterTwitterUserPage = function(htmlNitterUserPage, options) {
-try{
 	var rootDoc = HTMLParser.parse(htmlNitterUserPage);
 	var entireTimeline = rootDoc.querySelector('.timeline');
 
@@ -209,9 +208,4 @@ try{
 	strProccessEntireTimelineHTML = strProccessEntireTimelineHTML.replaceAll('data-url="', 'data-url="https://twitter.censors.us');
 	strProccessEntireTimelineHTML = replaceForbiddenCharsAndStrings(strProccessEntireTimelineHTML);
 	return strProccessEntireTimelineHTML;
-}catch(e){
-	console.log(e);
-	throw e;
-}
-	
 }

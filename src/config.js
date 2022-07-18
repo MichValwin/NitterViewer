@@ -2,7 +2,7 @@ module.exports = {
     PORT: 8020,
 	API_ENDPOINT: '/v1',
 	LOG_DIRECTORY: './logs/',
-	LOG_LEVEL: 3,
+	LOG_LEVEL: 5,
 
 	PASSWORD_FILE: './password.txt',
 	SALT_ROUNDS: 14,
