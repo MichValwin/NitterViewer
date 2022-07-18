@@ -43,7 +43,7 @@ async function checkFileExistAndDownload(filenamePath) {
 	if(!fs.existsSync(localFilePath)) {
 		logModule.log(logModule.LOG_LEVEL_DEBUG, 'Downloading file: ' + 'https://nitter.privacy.com.de' + filenamePath);
 		const responseBuffer = await requestModule.downloadStream('https://nitter.privacy.com.de' + filenamePath);
-		const onSuccessFileWrite = await responseBuffer.data.pipe(fs.createWriteStream(localFilePath));
+		await responseBuffer.data.pipe(fs.createWriteStream(localFilePath));
 
 		return true;
 	}else{
@@ -53,7 +53,7 @@ async function checkFileExistAndDownload(filenamePath) {
 }
 
 function replaceForbiddenCharsAndStrings(str) {
-	const allScriptText = new RegExp('< *\/? *script *>', 'gmi'); // Al types of <script> and </script>
+	const allScriptText = new RegExp('< */? *script *>', 'gmi'); // Al types of <script> and </script>
 	return str.replaceAll(allScriptText, '');
 }
 
@@ -137,12 +137,12 @@ exports.processNitterUserHtmlPage = async function(axiosResponse) {
 
 	// Process protected or private profiles
 	let protectedTitle = root.querySelector('.timeline-protected');
+	var profileInfo = getProfileInfo(root);
+	
 	if(protectedTitle != null) {
 		logModule.log(logModule.LOG_LEVEL_INFO, 'Profile of: ' + profileInfo.username + ' is protected');
 		return {'profile' : profileInfo, 'userPageHtml': null};
 	}
-
-	var profileInfo = getProfileInfo(root);
 
 	// Download images and video from timeline
 	var entireTimeline = root.querySelector('.timeline');

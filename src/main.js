@@ -122,7 +122,7 @@ expressApp.get(configModule.API_ENDPOINT + '/twitterList/:listName', someSession
 		for(let i = 0; i < nitterList.length; i++) {
 			if(nitterList[i].Name == listName) {
 				userTimelinesToSend = new Array(nitterList[i].userData.length);
-
+				
 				for(let j = 0; j < nitterList[i].userData.length; j++) {
 					userTimelinesToSend[j] = {};
 					userTimelinesToSend[j].profile = nitterList[i].userData[j].profile;
@@ -137,8 +137,13 @@ expressApp.get(configModule.API_ENDPOINT + '/twitterList/:listName', someSession
 		// Filter Tweets
 		let startTimeFilter = new Date().getTime();
 		for(let i = 0; i < userTimelinesToSend.length; i++) {
-			let entireTimelineHtml = processNitterUserpage.filterTwitterUserPage(userTimelinesToSend[i].entireTimeline, options);
-			userTimelinesToSend[i].entireTimeline = entireTimelineHtml;
+			let entireHtml = userTimelinesToSend[i].entireTimeline;
+			if(entireHtml != null){
+				let entireTimelineHtml = processNitterUserpage.filterTwitterUserPage(userTimelinesToSend[i].entireTimeline, options);
+				userTimelinesToSend[i].entireTimeline = entireTimelineHtml;
+			}else{
+				entireHtml = '';
+			}
 		}
 		let endTimeFilter = new Date().getTime();
 		logModule.log(logModule.LOG_LEVEL_VERBOSE, 'Milliseconds taken to filter tweets: ' + (endTimeFilter - startTimeFilter));
