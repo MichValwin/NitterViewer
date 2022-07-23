@@ -6,7 +6,7 @@ import Globals from '../globals.js'
 
 const props = defineProps(['listName'])
 
-var nitterTweets = ref('')
+var nitterUserTimelines = ref('')
 
 // Get all timeline
 var getNitterTimeline = function(listName) {
@@ -14,7 +14,17 @@ var getNitterTimeline = function(listName) {
 		.then(function(response) {
 			if(response.data.response !== 0) {
 				console.log(response.data.response)
-				nitterTweets.value = response.data.response
+				let usersTimelines = response.data.response
+
+				// Concadenate tweets to print as HTML
+				for(let i = 0; i < usersTimelines.length; i++) {	
+					let tweetsConcadenated = ''
+					for(let j = 0; j < usersTimelines[i].tweets.length; j++) {
+						tweetsConcadenated += usersTimelines[i].tweets[j].tweet
+					}
+					usersTimelines[i].tweetsString = tweetsConcadenated;
+				}
+				nitterUserTimelines.value = usersTimelines;
 			}else{
 				console.log(response.data.error)
 			}
@@ -34,12 +44,12 @@ watch(props, () => {
 
 <template>
 	<div>
-		<template v-for="(userTimeline, index) of nitterTweets" :key="index">
+		<template v-for="(userTimeline, index) of nitterUserTimelines" :key="index">
 			<!--Profile card-->
 			<div class="container-fluid profile-bg">
 				<div class="row justify-content-md-center">
 					<div class="col-sm-6">
-						<a class="" :href="userTimeline.avatar" target="_blank">
+						<a class="" :href="userTimeline.profile.avatar" target="_blank">
 							<img style="max-height:200px; width:auto;" :src="userTimeline.profile.avatarThumb">
 						</a>
 						<div class="profile-card-tabs-name">
@@ -75,8 +85,8 @@ watch(props, () => {
 				</div>
 			</div>
 
-			<!--Content-->
-			<div class="timeline" v-html="userTimeline.entireTimeline"></div>
+			<!--Timeline Content-->
+			<div class="timeline" v-html="userTimeline.tweetsString"></div>
 
 			<br>
 		</template>

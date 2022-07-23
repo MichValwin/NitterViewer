@@ -5,18 +5,6 @@ const requestModule = require('./request.js');
 const configModule = require('./config.js');
 const logModule = require('./logger.js');
 
-function isTweetTooOld(tweet) {
-	let tweetDateString = tweet.querySelector('.tweet-date').firstChild.getAttribute('title');
-	let tweetDate = new Date(tweetDateString.split("·")[0]);
-
-	let elapsedDays = (new Date().getTime() - tweetDate.getTime()) / (1000 * 60 * 60 * 24);
-	if(elapsedDays > 93) {
-		return true;
-	} else {
-		return false;
-	}
-}
-
 function isTweetPinned(tweet) {
 	let pinnedDiv = tweet.querySelector('.pinned');
 	if(pinnedDiv) {
@@ -33,6 +21,12 @@ function isTweetRetweet(tweet) {
 	} else {
 		return false;
 	}
+}
+
+function getTimeMillisFromTweet(tweet) {
+	let tweetDateString = tweet.querySelector('.tweet-date').firstChild.getAttribute('title');
+	let tweetDate = new Date(tweetDateString.split("·")[0]);
+	return tweetDate.getTime();
 }
 
 
@@ -132,6 +126,28 @@ async function downloadVideosTimeline(parsedTimeline) {
 	}
 }
 
+function proccessTweets(parsedTimeline) {
+	let tweetsDivElements = parsedTimeline.querySelectorAll('.timeline-item, .thread-line');
+
+	let tweetsProcessed = tweetsDivElements.map(tweetElement => {
+		let isPinned = isTweetPinned(tweetElement);
+		let isRetweet = isTweetRetweet(tweetElement);
+		let dateMillis = getTimeMillisFromTweet(tweetElement);
+
+		
+		let tweetHTMLProcessed = tweetElement.outerHTML;
+		tweetHTMLProcessed = tweetHTMLProcessed.replaceAll('href="', 'href="https://twitter.censors.us');
+		tweetHTMLProcessed = tweetHTMLProcessed.replaceAll('poster="', 'poster="https://twitter.censors.us');
+		tweetHTMLProcessed = tweetHTMLProcessed.replaceAll('data-url="', 'data-url="https://twitter.censors.us');
+		tweetHTMLProcessed = replaceForbiddenCharsAndStrings(tweetHTMLProcessed);
+
+		return {tweet: tweetHTMLProcessed, 'isPinned': isPinned, 'isRetweet': isRetweet, date: dateMillis};
+	});
+	
+	return tweetsProcessed;
+}
+
+
 exports.processNitterUserHtmlPage = async function(axiosResponse) {
 	var root = HTMLParser.parse(axiosResponse.data);
 
@@ -149,63 +165,35 @@ exports.processNitterUserHtmlPage = async function(axiosResponse) {
 
 	await downloadImagesTimeline(entireTimeline);
 	await downloadVideosTimeline(entireTimeline);
+
+	let tweets = proccessTweets(entireTimeline);
 	
-	return {'profile' : profileInfo, 'userPageHtml': axiosResponse.data};
+	return {'profile' : profileInfo, 'tweets': tweets, 'userPageHtml': axiosResponse.data};
 }
 
-
-exports.filterTwitterUserPage = function(htmlNitterUserPage, options) {
-	var rootDoc = HTMLParser.parse(htmlNitterUserPage);
-	var entireTimeline = rootDoc.querySelector('.timeline');
-
-	// Remove top-ref and show-more divs
-	entireTimeline.removeChild(entireTimeline.querySelector('.top-ref'));
-	entireTimeline.removeChild(entireTimeline.querySelector('.show-more'));
-
-	// --------- Filter ----------
-	let tweetsToDelete = new Set();
-	let tweets = entireTimeline.querySelectorAll('.timeline-item');
-	tweets.concat(entireTimeline.querySelectorAll('.thread-line'));
-
-	// Get Pinned
+exports.filterTweets = function(tweets, options) {
+	// Filter Pinned
 	if(!options.Pinned) {
-		let tweetsPinned = tweets.filter(isTweetPinned);
-		for(let i = 0; i < tweetsPinned.length; i++) {
-			tweetsToDelete.add(tweetsPinned[i]);
-		}
+		tweets = tweets.filter(tweet => {
+			return !tweet.isPinned;
+		});
 	}
 
-	// get retweets
+	// Filter retweets
 	if(!options.Retweets) {
-		let retweets = tweets.filter(isTweetRetweet);
-		for(let i = 0; i < retweets.length; i++) {
-			tweetsToDelete.add(retweets[i]);
+		tweets = tweets.filter(tweet => {
+			return !tweet.isRetweet;
+		});
+	}
+
+	// Filter 93 days old tweets 
+	tweets = tweets.filter((tweet, index) => {
+		if(index > 6) {
+			let elapsedDays = (new Date().getTime() - tweet.dateMillis) / (1000 * 60 * 60 * 24);
+			if(elapsedDays > 93)return false;
 		}
-	}
-
-	// Get 93 days old tweets if timeline has more than 10 tweets
-	let timeLineItems = entireTimeline.querySelectorAll('.timeline-item:nth-child(n+6)');
-	let threadLines = entireTimeline.querySelectorAll('.thread-line:nth-child(n+6)');
-	let timeLineItemsToDelete = timeLineItems.filter(isTweetTooOld);
-	let threadLinesToDelete = threadLines.filter(isTweetTooOld);
-
-	for(let i = 0; i < timeLineItemsToDelete.length; i++) {
-		tweetsToDelete.add(timeLineItemsToDelete[i])
-	}
-	for(let i = 0; i < threadLinesToDelete.length; i++) {
-		tweetsToDelete.add(threadLinesToDelete[i])
-	}
-
-	// Delete tweets marked
-	logModule.log(logModule.LOG_LEVEL_DEBUG, 'Tweets to delete: ' + tweetsToDelete.size);
-	tweetsToDelete.forEach(function(tweetToBeDeleted) {
-		entireTimeline.removeChild(tweetToBeDeleted);
+		return true;
 	});
 
-	let strProccessEntireTimelineHTML = entireTimeline.innerHTML;
-	strProccessEntireTimelineHTML = strProccessEntireTimelineHTML.replaceAll('href="', 'href="https://twitter.censors.us');
-	strProccessEntireTimelineHTML = strProccessEntireTimelineHTML.replaceAll('poster="', 'poster="https://twitter.censors.us');
-	strProccessEntireTimelineHTML = strProccessEntireTimelineHTML.replaceAll('data-url="', 'data-url="https://twitter.censors.us');
-	strProccessEntireTimelineHTML = replaceForbiddenCharsAndStrings(strProccessEntireTimelineHTML);
-	return strProccessEntireTimelineHTML;
+	return tweets;
 }

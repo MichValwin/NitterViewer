@@ -126,27 +126,19 @@ expressApp.get(configModule.API_ENDPOINT + '/twitterList/:listName', someSession
 				for(let j = 0; j < nitterList[i].userData.length; j++) {
 					userTimelinesToSend[j] = {};
 					userTimelinesToSend[j].profile = nitterList[i].userData[j].profile;
-					userTimelinesToSend[j].entireTimeline = nitterList[i].userData[j].userPageHtml;
+					userTimelinesToSend[j].tweets = nitterList[i].userData[j].tweets;
 				}
 
 				options.Pinned = nitterList[i].Pinned;
 				options.Retweets = nitterList[i].Retweets;
+				break;
 			}
 		}
 
 		// Filter Tweets
-		let startTimeFilter = new Date().getTime();
 		for(let i = 0; i < userTimelinesToSend.length; i++) {
-			let entireHtml = userTimelinesToSend[i].entireTimeline;
-			if(entireHtml != null){
-				let entireTimelineHtml = processNitterUserpage.filterTwitterUserPage(userTimelinesToSend[i].entireTimeline, options);
-				userTimelinesToSend[i].entireTimeline = entireTimelineHtml;
-			}else{
-				entireHtml = '';
-			}
+			userTimelinesToSend[i].tweets = processNitterUserpage.filterTweets(userTimelinesToSend[i].tweets, options);
 		}
-		let endTimeFilter = new Date().getTime();
-		logModule.log(logModule.LOG_LEVEL_VERBOSE, 'Milliseconds taken to filter tweets: ' + (endTimeFilter - startTimeFilter));
 		
 		if(userTimelinesToSend) {
 			res.json({'response': userTimelinesToSend});
