@@ -35,8 +35,8 @@ async function checkFileExistAndDownload(filenamePath) {
 	const localFilePath = path.resolve(configModule.DOWNLOAD_FOLDER + 'pic/', fileName);
 	
 	if(!fs.existsSync(localFilePath)) {
-		logModule.log(logModule.LOG_LEVEL_DEBUG, 'Downloading file: ' + 'https://nitter.privacy.com.de' + filenamePath);
-		const responseBuffer = await requestModule.downloadStream('https://nitter.privacy.com.de' + filenamePath);
+		logModule.log(logModule.LOG_LEVEL_DEBUG, 'Downloading file: ' + configModule.NITTER_WEBSITE + filenamePath);
+		const responseBuffer = await requestModule.downloadStream(configModule.NITTER_WEBSITE + filenamePath);
 		await responseBuffer.data.pipe(fs.createWriteStream(localFilePath));
 
 		return true;
@@ -136,9 +136,9 @@ function proccessTweets(parsedTimeline) {
 
 		
 		let tweetHTMLProcessed = tweetElement.outerHTML;
-		tweetHTMLProcessed = tweetHTMLProcessed.replaceAll('href="', 'href="https://twitter.censors.us');
-		tweetHTMLProcessed = tweetHTMLProcessed.replaceAll('poster="', 'poster="https://twitter.censors.us');
-		tweetHTMLProcessed = tweetHTMLProcessed.replaceAll('data-url="', 'data-url="https://twitter.censors.us');
+		tweetHTMLProcessed = tweetHTMLProcessed.replaceAll('href="', 'href="' + configModule.NITTER_WEBSITE);
+		tweetHTMLProcessed = tweetHTMLProcessed.replaceAll('poster="', 'poster="' + configModule.NITTER_WEBSITE);
+		tweetHTMLProcessed = tweetHTMLProcessed.replaceAll('data-url="', 'data-url="' + configModule.NITTER_WEBSITE);
 		tweetHTMLProcessed = replaceForbiddenCharsAndStrings(tweetHTMLProcessed);
 
 		return {tweet: tweetHTMLProcessed, 'isPinned': isPinned, 'isRetweet': isRetweet, date: dateMillis};
@@ -173,14 +173,14 @@ exports.processNitterUserHtmlPage = async function(axiosResponse) {
 
 exports.filterTweets = function(tweets, options) {
 	// Filter Pinned
-	if(!options.Pinned) {
+	if(!options.pinned) {
 		tweets = tweets.filter(tweet => {
 			return !tweet.isPinned;
 		});
 	}
 
 	// Filter retweets
-	if(!options.Retweets) {
+	if(!options.retweets) {
 		tweets = tweets.filter(tweet => {
 			return !tweet.isRetweet;
 		});
