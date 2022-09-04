@@ -114,9 +114,14 @@ expressApp.get(configModule.API_ENDPOINT + '/lists', someSession, function (req,
 });
 
 expressApp.get(configModule.API_ENDPOINT + '/twitterList/:listName', someSession, function (req, res) {
-	const listName = req.params.listName
+	const listName = req.params.listName;
+
+	const optionsReceived = req.query.pinned != undefined && req.query.retweets != undefined;
+	const reqPinned = req.query.pinned === 'true';
+	const reqRetweets = req.query.retweets === 'true';
+
 	var userTimelinesToSend = null;
-	var options = {"Pinned": true, "Retweets": true, "PagesToLoad": 1};
+	var options = {"pinned": reqPinned, "retweets": reqRetweets, "pagesToLoad": 1};
 
 	if(listName != null) {
 		for(let i = 0; i < nitterList.length; i++) {
@@ -129,8 +134,8 @@ expressApp.get(configModule.API_ENDPOINT + '/twitterList/:listName', someSession
 					userTimelinesToSend[j].tweets = nitterList[i].userData[j].tweets;
 				}
 
-				options.Pinned = nitterList[i].Pinned;
-				options.Retweets = nitterList[i].Retweets;
+				if(!optionsReceived)options.pinned = nitterList[i].Pinned;
+				if(!optionsReceived)options.retweets = nitterList[i].Retweets;
 				break;
 			}
 		}
@@ -141,7 +146,7 @@ expressApp.get(configModule.API_ENDPOINT + '/twitterList/:listName', someSession
 		}
 		
 		if(userTimelinesToSend) {
-			res.json({'response': userTimelinesToSend});
+			res.json({'response': userTimelinesToSend, 'options': options});
 		}else{
 			throw new errorModule.Error(errorModule.TYPE_LOGIC, 'No data');
 		}
@@ -246,14 +251,14 @@ function updateAllNitterUserData() {
 
 		// Users
 		for(let j = 0; j < nitterList[i].Users.length; j++) {
-			let promiseReq = requestModule.doGETRequest(configModule.NITTER_WEBSITE + nitterList[i].Users[j]).then(
+			let promiseReq = requestModule.doGETRequest(configModule.NITTER_WEBSITE + '/' +  nitterList[i].Users[j]).then(
 				function onFullfill(twitterPageContent) {
 					processNitterUserpage.processNitterUserHtmlPage(twitterPageContent).then(
 						function onFullfill(response){
 							nitterList[i].userData[j] = response;
 						},
 						function(error) {
-							logModule.log(logModule.LOG_LEVEL_ERROR, 'Error while parsing ' + configModule.NITTER_WEBSITE + nitterList[i].Users[j]);
+							logModule.log(logModule.LOG_LEVEL_ERROR, 'Error while parsing ' + configModule.NITTER_WEBSITE + '/' + nitterList[i].Users[j]);
 							logModule.log(logModule.LOG_LEVEL_DEBUG, error.stack);
 							logModule.log(logModule.LOG_LEVEL_DEBUG, error.pageData);
 						}

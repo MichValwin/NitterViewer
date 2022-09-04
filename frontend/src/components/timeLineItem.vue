@@ -8,12 +8,22 @@ const props = defineProps(['listName'])
 
 var nitterUserTimelines = ref('')
 
+var filterPinned = ref('')
+var filterRetweets = ref('')
+
+
+
 // Get all timeline
-var getNitterTimeline = function(listName) {
-	axios.get(Globals.SERVER_END_POINT + '/twitterList/' + listName)
+var getNitterTimeline = function(sendOptions) {
+	var options = {}
+	if(sendOptions)options = {'pinned': filterPinned.value, 'retweets': filterRetweets.value}
+
+	axios.get(Globals.SERVER_END_POINT + '/twitterList/' + props.listName, {params: options})
 		.then(function(response) {
 			if(response.data.response !== 0) {
-				console.log(response.data.response)
+				filterPinned.value = response.data.options.pinned
+				filterRetweets.value = response.data.options.retweets
+
 				let usersTimelines = response.data.response
 
 				// Concadenate tweets to print as HTML
@@ -34,15 +44,38 @@ var getNitterTimeline = function(listName) {
 		})
 }
 
-getNitterTimeline(props.listName)
+getNitterTimeline(false)
 
 watch(props, () => {
-	getNitterTimeline(props.listName)
+	getNitterTimeline(false)
 })
 
 </script>
 
 <template>
+	<!--Options-->
+	<div>
+		<div class="container-fluid">
+			<div class="row justify-content-md-center">
+				<div class="col-sm-3">
+					<div class="form-check form-switch">
+						<input class="form-check-input" type="checkbox" id="pinned-switch" v-model="filterPinned">
+						<label class="form-check-label" for="pinned-switch">Pinned</label>
+					</div>
+				</div>
+				<div class="col-sm-3">
+					<div class="form-check form-switch">
+						<input class="form-check-input" type="checkbox" id="retweet-switch" v-model="filterRetweets">
+						<label class="form-check-label" for="retweet-switch">Retweets</label>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<button type="button" class="btn btn-primary" @click="getNitterTimeline(true)">Update filter</button>
+				</div>
+			</div>
+		</div>		
+	</div>
+
 	<div>
 		<template v-for="(userTimeline, index) of nitterUserTimelines" :key="index">
 			<!--Profile card-->
