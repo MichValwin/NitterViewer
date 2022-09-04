@@ -126,12 +126,15 @@ expressApp.get(configModule.API_ENDPOINT + '/twitterList/:listName', someSession
 	if(listName != null) {
 		for(let i = 0; i < nitterList.length; i++) {
 			if(nitterList[i].Name == listName) {
-				userTimelinesToSend = new Array(nitterList[i].userData.length);
+				userTimelinesToSend = [];
 				
 				for(let j = 0; j < nitterList[i].userData.length; j++) {
-					userTimelinesToSend[j] = {};
-					userTimelinesToSend[j].profile = nitterList[i].userData[j].profile;
-					userTimelinesToSend[j].tweets = nitterList[i].userData[j].tweets;
+					if(nitterList[i].userData[j] != null && nitterList[i].userData[j].tweets != null){
+						let userToSend = {};
+						userToSend.profile = nitterList[i].userData[j].profile;
+						userToSend.tweets = nitterList[i].userData[j].tweets;
+						userTimelinesToSend.push(userToSend);
+					}
 				}
 
 				if(!optionsReceived)options.pinned = nitterList[i].Pinned;
