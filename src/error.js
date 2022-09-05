@@ -37,7 +37,10 @@ Error.prototype.toString = function() {
 
 // Proccess errors and respond with expressJS
 function proccessAndSendErrors(error, res) {
-	logModule.log(logModule.LOG_LEVEL_ERROR, 'Throwing error: ' + error.toString() + ' Message: ' + error.message + ' Stack trace: ' + error.stack);
+	let errorText = 'Throwing error: ' + error.toString() + ' Message: ' + error.message;
+	if(error.stack != null)errorText += ' Stack trace: ' + error.stack;
+	logModule.log(logModule.LOG_LEVEL_ERROR, errorText);
+	
 	switch(error.type) {
 		case TYPE_LOGIC:
 			res.status(400).json({'response' : 0, 'error': error.message});
