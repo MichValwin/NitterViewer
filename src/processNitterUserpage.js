@@ -127,13 +127,14 @@ async function downloadVideosTimeline(parsedTimeline) {
 }
 
 function proccessTweets(parsedTimeline) {
-	let tweetsDivElements = parsedTimeline.querySelectorAll('.timeline-item, .thread-line');
-
+	let tweetsDivElements = parsedTimeline.querySelectorAll('.timeline-item');
+	
 	let tweetsProcessed = tweetsDivElements.map(tweetElement => {
 		let isPinned = isTweetPinned(tweetElement);
 		let isRetweet = isTweetRetweet(tweetElement);
 		let dateMillis = getTimeMillisFromTweet(tweetElement);
 
+		let isOnThread = tweetElement.parentNode.classList._set.has('thread-line');
 		
 		let tweetHTMLProcessed = tweetElement.outerHTML;
 		tweetHTMLProcessed = tweetHTMLProcessed.replaceAll('href="', 'href="' + configModule.NITTER_WEBSITE);
@@ -141,7 +142,7 @@ function proccessTweets(parsedTimeline) {
 		tweetHTMLProcessed = tweetHTMLProcessed.replaceAll('data-url="', 'data-url="' + configModule.NITTER_WEBSITE);
 		tweetHTMLProcessed = replaceForbiddenCharsAndStrings(tweetHTMLProcessed);
 
-		return {tweet: tweetHTMLProcessed, 'isPinned': isPinned, 'isRetweet': isRetweet, date: dateMillis};
+		return {'tweet': tweetHTMLProcessed, 'isPinned': isPinned, 'isRetweet': isRetweet, 'date': dateMillis, 'isOnThread': isOnThread};
 	});
 	
 	return tweetsProcessed;

@@ -25,11 +25,23 @@ var getNitterTimeline = function(sendOptions) {
 				filterRetweets.value = response.data.options.retweets
 
 				let usersTimelines = response.data.response
+				console.log(usersTimelines)
 
 				// Concadenate tweets to print as HTML
 				for(let i = 0; i < usersTimelines.length; i++) {	
 					let tweetsConcadenated = ''
+					let threadStart = false
 					for(let j = 0; j < usersTimelines[i].tweets.length; j++) {
+						// Start thread
+						if(usersTimelines[i].tweets[j].isOnThread && !threadStart){
+							tweetsConcadenated += '<div class="thread-line">';
+							threadStart = true;
+						}
+						//End thread
+						if(!usersTimelines[i].tweets[j].isOnThread && threadStart){
+							tweetsConcadenated += '</div>';
+							threadStart = false;
+						}
 						tweetsConcadenated += usersTimelines[i].tweets[j].tweet
 					}
 					usersTimelines[i].tweetsString = tweetsConcadenated;
