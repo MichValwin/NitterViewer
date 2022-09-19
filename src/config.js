@@ -11,7 +11,7 @@ module.exports = {
 
 	SOCKS_PROXY: '', // Ex: 'socks5://192.168.1.151:9050'
 
-	NITTER_WEBSITE: 'https://twitter.censors.us/',
+	NITTER_WEBSITE: 'https://nitter.privacy.com.de',
 	TWITTER_LISTS: './nitterList.json',
 
 	COOKIE_MAX_AGE: 1000 * 60 * 60 * 24 * 30, // 30 days
