@@ -187,14 +187,23 @@ exports.filterTweets = function(tweets, options) {
 		});
 	}
 
-	// Filter 93 days old tweets 
-	tweets = tweets.filter((tweet, index) => {
-		if(index > 6) {
-			let elapsedDays = (new Date().getTime() - tweet.dateMillis) / (1000 * 60 * 60 * 24);
-			if(elapsedDays > 93)return false;
-		}
-		return true;
-	});
+	// Filter more than one day old tweets
+	if(options.oneDayOld) {
+		tweets = tweets.filter((tweet) => {
+			let elapsedDays = (new Date().getTime() - tweet.date) / (1000 * 60 * 60 * 24);
+			if(elapsedDays > 1)return false;
+			return true;
+		});
+	}
+
+	// Filter more than three day old tweets
+	if(options.threeDayOld) {
+		tweets = tweets.filter((tweet) => {
+			let elapsedDays = (new Date().getTime() - tweet.date) / (1000 * 60 * 60 * 24);
+			if(elapsedDays > 3)return false;
+			return true;
+		});
+	}
 
 	return tweets;
 }

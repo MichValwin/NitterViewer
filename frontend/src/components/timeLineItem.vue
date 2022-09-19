@@ -10,19 +10,21 @@ var nitterUserTimelines = ref('')
 
 var filterPinned = ref('')
 var filterRetweets = ref('')
-
-
+var filterOneDayOld = ref('')
+var filterThreeDayOld = ref('')
 
 // Get all timeline
 var getNitterTimeline = function(sendOptions) {
 	var options = {}
-	if(sendOptions)options = {'pinned': filterPinned.value, 'retweets': filterRetweets.value}
+	if(sendOptions)options = {'pinned': filterPinned.value, 'retweets': filterRetweets.value, 'oneDayOld': filterOneDayOld.value, 'threeDayOld': filterThreeDayOld.value}
 
 	axios.get(Globals.SERVER_END_POINT + '/twitterList/' + props.listName, {params: options})
 		.then(function(response) {
 			if(response.data.response !== 0) {
 				filterPinned.value = response.data.options.pinned
 				filterRetweets.value = response.data.options.retweets
+				filterOneDayOld.value = response.data.options.oneDayOld
+				filterThreeDayOld.value = response.data.options.threeDayOld
 
 				let usersTimelines = response.data.response
 				console.log(usersTimelines)
@@ -69,19 +71,31 @@ watch(props, () => {
 	<div>
 		<div class="container-fluid">
 			<div class="row justify-content-md-center">
-				<div class="col-sm-3">
+				<div class="col-sm-2">
 					<div class="form-check form-switch">
 						<input class="form-check-input" type="checkbox" id="pinned-switch" v-model="filterPinned">
 						<label class="form-check-label" for="pinned-switch">Pinned</label>
 					</div>
 				</div>
-				<div class="col-sm-3">
+				<div class="col-sm-2">
 					<div class="form-check form-switch">
 						<input class="form-check-input" type="checkbox" id="retweet-switch" v-model="filterRetweets">
 						<label class="form-check-label" for="retweet-switch">Retweets</label>
 					</div>
 				</div>
-				<div class="col-sm-6">
+				<div class="col-sm-2">
+					<div class="form-check form-switch">
+						<input class="form-check-input" type="checkbox" id="one-day-switch" v-model="filterOneDayOld">
+						<label class="form-check-label" for="one-day-switch">Filter only one-day old</label>
+					</div>
+				</div>
+				<div class="col-sm-2">
+					<div class="form-check form-switch">
+						<input class="form-check-input" type="checkbox" id="three-day-switch" v-model="filterThreeDayOld">
+						<label class="form-check-label" for="three-day-switch">Filter only three-day old</label>
+					</div>
+				</div>
+				<div class="col-sm-4">
 					<button type="button" class="btn btn-primary" @click="getNitterTimeline(true)">Update filter</button>
 				</div>
 			</div>

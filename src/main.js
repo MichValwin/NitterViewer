@@ -119,9 +119,11 @@ expressApp.get(configModule.API_ENDPOINT + '/twitterList/:listName', someSession
 	const optionsReceived = req.query.pinned != undefined && req.query.retweets != undefined;
 	const reqPinned = req.query.pinned === 'true';
 	const reqRetweets = req.query.retweets === 'true';
+	const reqOneDayOld = req.query.oneDayOld === 'true';
+	const reqThreeDayOld = req.query.threeDayOld === 'true';
 
 	var userTimelinesToSend = null;
-	var options = {"pinned": reqPinned, "retweets": reqRetweets, "pagesToLoad": 1};
+	var options = {"pinned": reqPinned, "retweets": reqRetweets, "oneDayOld": reqOneDayOld, "threeDayOld": reqThreeDayOld, "pagesToLoad": 1};
 
 	if(listName != null) {
 		for(let i = 0; i < nitterList.length; i++) {
@@ -137,6 +139,7 @@ expressApp.get(configModule.API_ENDPOINT + '/twitterList/:listName', someSession
 					}
 				}
 
+				// Get default options from list
 				if(!optionsReceived)options.pinned = nitterList[i].Pinned;
 				if(!optionsReceived)options.retweets = nitterList[i].Retweets;
 				break;
@@ -297,7 +300,6 @@ function mainLoop() {
 		requestDataTimeStamp = new Date();
 	}
 }
-
 
 // On close
 process.on('SIGINT', function(){
