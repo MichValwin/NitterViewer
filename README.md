@@ -14,7 +14,7 @@ Although Nitter is private, I recommend to setup a Tor SOCKS proxy and connect i
  - Install packages for vue frontend. Go to *./frontend/* directory and do `npm install`, then build it with `npm run build`.
  - Install libraries in main directory with `npm install`.
 ## Config project
- - Change config file in */src/config.js* as you want. You probably want to disable SOCKS_PROXY (leave it as '').
+ - Change config file in */src/config.js* as you want.
  - Rename NitterList.example.json to NitterList.json and edit it as you like.
  - Run the project with `npm run start`, then it will prompt you to choose a password.
  - Connect to it through the port written in */src/config.js*. Default is 8020.
