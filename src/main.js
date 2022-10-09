@@ -257,34 +257,37 @@ function updateAllNitterUserData() {
 
 		// Users
 		for(let j = 0; j < nitterList[i].Users.length; j++) {
-			let promiseReq = requestModule.doGETRequest(configModule.NITTER_WEBSITE + '/' +  nitterList[i].Users[j]).then(
-				function onFullfill(twitterPageContent) {
-					processNitterUserpage.processNitterUserHtmlPage(twitterPageContent).then(
-						function onFullfill(response){
-							nitterList[i].userData[j] = response;
-						},
-						function(error) {
-							logModule.log(logModule.LOG_LEVEL_ERROR, 'Error while parsing ' + configModule.NITTER_WEBSITE + '/' + nitterList[i].Users[j]);
-							logModule.log(logModule.LOG_LEVEL_DEBUG, error.stack);
-							logModule.log(logModule.LOG_LEVEL_DEBUG, error.pageData);
-						}
-					);
-				}
-			).catch(
-				function onError(error){
-					logModule.log(logModule.LOG_LEVEL_ERROR, 'Error during request to page, url: ' + error.config.url + ' response: ' + error.response?.status);
-					logModule.log(logModule.LOG_LEVEL_ERROR, error.stack);
-				}
-			);
+			let promiseReq = requestModule.doGETRequest(configModule.NITTER_WEBSITE + '/' +  nitterList[i].Users[j])
+				.then(
+					function onSuccess(twitterPageContent) {
+						processNitterUserpage.processNitterUserHtmlPage(twitterPageContent).then(
+							function onSuccess(response) {
+								nitterList[i].userData[j] = response;
+							},
+							function onError(error) {
+								logModule.log(logModule.LOG_LEVEL_ERROR, 'Error while parsing ' + configModule.NITTER_WEBSITE + '/' + nitterList[i].Users[j]);
+								logModule.log(logModule.LOG_LEVEL_DEBUG, error.stack);
+								logModule.log(logModule.LOG_LEVEL_DEBUG, error.pageData);
+							}
+						);
+					},
+					function onError(error) {
+						logModule.log(logModule.LOG_LEVEL_ERROR, 'Error during request to page, url: ' + error.config.url + ' response: ' + error.response?.status);
+						logModule.log(logModule.LOG_LEVEL_ERROR, error.stack);
+					}
+				);
 
 			allPromisesRequest.push(promiseReq);
 		}
 	}
 
-	Promise.all(allPromisesRequest).then(function() {
-		logModule.log(logModule.LOG_LEVEL_INFO, 'Finish to update Nitter lists');
-		requestDataTimeStamp = new Date();
-	});
+	
+	Promise.allSettled(allPromisesRequest).then(
+		function onSuccess(promisesStatus) {
+			logModule.log(logModule.LOG_LEVEL_INFO, 'Finish to update Nitter lists');
+			requestDataTimeStamp = new Date();
+		}
+	);
 }
 
 
