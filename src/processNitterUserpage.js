@@ -161,6 +161,9 @@ exports.processNitterUserHtmlPage = async function(axiosResponse) {
 		return {'profile' : profileInfo, 'userPageHtml': null};
 	}
 
+	// Download profile thumb picture
+	await checkFileExistAndDownload(profileInfo.avatarThumb);
+
 	// Download images and video from timeline
 	var entireTimeline = root.querySelector('.timeline');
 
