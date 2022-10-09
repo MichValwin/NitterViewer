@@ -16,24 +16,22 @@ if(configModule.SOCKS_PROXY) {
 }
 
 
-exports.doGETRequest = async function(urlString) {
-	let response = await axios.request({
+exports.doGETRequest = function(urlString) {
+	return axios.request({
 		method: 'GET',
 		url: urlString,
-		httpsAgent: httpsAgent
+		httpsAgent: httpsAgent,
+		timeout: 30000
 	});
-
-	return response;
 }
 
-exports.downloadStream = async function(urlString) {
-	let response = await axios.request({
+exports.downloadStream = function(urlString) {
+	return axios.request({
 		method: 'GET',
 		url: urlString,
 		httpsAgent: httpsAgent,
 
-		responseType: 'stream'
+		responseType: 'stream',
+		timeout: 30000
 	});
-
-	return response;
 }
