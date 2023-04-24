@@ -32,7 +32,7 @@ function getTimeMillisFromTweet(tweet) {
 
 async function checkFileExistAndDownload(filenamePath) {
 	const fileName = path.basename(filenamePath); // file without /pic path
-	const localFilePath = path.resolve(configModule.DOWNLOAD_FOLDER + 'pic/', fileName);
+	const localFilePath = path.resolve(configModule.DOWNLOAD_FOLDER + 'pic/enc/', fileName);
 	
 	if(!fs.existsSync(localFilePath)) {
 		logModule.log(logModule.LOG_LEVEL_DEBUG, 'Downloading file: ' + configModule.NITTER_WEBSITE + filenamePath);
@@ -168,7 +168,7 @@ exports.processNitterUserHtmlPage = async function(axiosResponse) {
 	var entireTimeline = root.querySelector('.timeline');
 
 	await downloadImagesTimeline(entireTimeline);
-	await downloadVideosTimeline(entireTimeline);
+	//await downloadVideosTimeline(entireTimeline);
 
 	let tweets = proccessTweets(entireTimeline);
 	
