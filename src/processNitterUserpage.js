@@ -32,7 +32,7 @@ function getTimeMillisFromTweet(tweet) {
 
 async function checkFileExistAndDownload(filenamePath) {
 	const fileName = path.basename(filenamePath); // file without /pic path
-	const localFilePath = path.resolve(configModule.DOWNLOAD_FOLDER + 'pic/enc/', fileName);
+	const localFilePath = path.resolve(configModule.DOWNLOAD_FOLDER + 'pic/', fileName);
 	
 	if(!fs.existsSync(localFilePath)) {
 		logModule.log(logModule.LOG_LEVEL_DEBUG, 'Downloading file: ' + configModule.NITTER_WEBSITE + filenamePath);

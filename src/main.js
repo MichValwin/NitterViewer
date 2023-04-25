@@ -222,7 +222,7 @@ function initProgram() {
 	}
 
 	// Check directories
-	let picDownloadDirectory = configModule.DOWNLOAD_FOLDER + 'pic/enc/';
+	let picDownloadDirectory = configModule.DOWNLOAD_FOLDER + 'pic/';
 	if (!fs.existsSync(picDownloadDirectory)){
 		fs.mkdirSync(picDownloadDirectory, { recursive: true });
 	}
